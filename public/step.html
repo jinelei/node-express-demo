@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+	<title>金康特计步计算器</title>
+	<meta http-equiv="pragma" content="no-cache">
+	<meta name="author" content="failte">
+	<meta name="keyword" content="金康特,KCT,计步,step,计算器,caculator,运动,sport,智能,intelligence,穿戴,wear,手环,bracelet,手表,watch,算法,arithmetic">
+	<meta name="description" content="金康特计步计算器">
+	<meta http-equiv="Window-target" content="_top">
+	<style type="text/css">
+		*{
+			box-sizing: border-box;
+		}
+		p{
+			font-weight: bold;
+			text-align: center;
+		}
+		textarea{
+			float: left;
+			width: 400px;
+			height: 200px;
+		}
+		header{
+			position: absolute;
+			left: 50%;
+			transform: translate(-50%);
+		}
+		button{
+			float: left;
+			clear: left;
+			width: 100px;
+			margin-left: 140px;
+		}
+		article{
+			position: absolute;
+			left: 50%;
+			top: 350px;
+			transform: translate(-50%);
+			width: 600px;
+		}
+		pre{
+			position: absolute;
+			left: 50%;
+			transform: translate(-50%);
+			margin: 0px;
+			height: 360px;
+			font-size: 16px;
+			font-weight: bold;
+			visibility: visible;
+		}
+		table{
+			position: absolute;
+			left: 50%;
+			transform: translate(-50%);
+			margin: 0px;
+			height: 360px;
+			font-size: 16px;
+			font-weight: bold;
+			visibility: hidden;
+		}
+		#baishou{
+			width: 400px;
+			height: 120px;
+			margin: 0px;
+			padding: 0px;
+			margin: 0px
+		}
+		#bubaishou{
+			width: 400px;
+			height: 40px
+			margin: 0px;
+			padding: 0px;
+		}
+		#paobu{
+			width: 400px;
+			height: 40px
+			margin: 0px;
+			padding: 0px;
+		}
+		td{
+			border: 1px solid black;
+			width: 100px;
+			height: 40px;
+			margin: 0px;
+			line-height: 40px;
+			text-align: center;
+		}
+		.title{
+			float: left;
+			clear: left;
+		}
+		.one,.two,.three{
+			float: left;
+		}
+	</style>
+</head>
+<body>
+	<header>
+		<p>输入计算数据</p>
+		<textarea placeholder="数据要求：必须有20组或者30组数据，每组数据之间用中文逗号、英文逗号、换行进行分隔"></textarea>
+		<button>计算</button><button>样本/例子</button><button>详细</button>
+	</header>
+	<article>
+		<pre>
+计步数据举例：
+
+3608,389,4441
+3712,490,4542
+4111,892,4946
+4637,1394,5447
+
+4741,1497,5553
+5141,1900,5955
+5644,2408,6457
+
+5742,2504,6560
+5940,2703,6762
+6149,2905,6964
+		</pre>
+<table>
+		<tr id="baishou">
+				<td class="title">摆手100</td>
+				<td class="one">102</td>
+				<td class="two">505</td>
+				<td class="three">1023</td>
+				<td class="title">摆手500</td>
+				<td class="one">101</td>
+				<td class="two">498</td>
+				<td class="three">999</td>
+				<td class="title">摆手1000</td>
+				<td class="one">101</td>
+				<td class="two">499</td>
+				<td class="three">1001</td>
+		</tr>
+		<tr id="bubaishou">
+				<td class="title">不摆手100</td>
+				<td class="one">101</td>
+				<td class="two">499</td>
+				<td class="three">1001</td>
+				<td class="title">不摆手500</td>
+				<td class="one">101</td>
+				<td class="two">499</td>
+				<td class="three">1001</td>
+				<td class="title">不摆手1000</td>
+				<td class="one">101</td>
+				<td class="two">499</td>
+				<td class="three">1001</td>
+		</tr>
+		<tr id="paobu">
+				<td class="title">跑步100</td>
+				<td class="one">101</td>
+				<td class="two">499</td>
+				<td class="three">1001</td>
+				<td class="title">跑步300</td>
+				<td class="one">101</td>
+				<td class="two">499</td>
+				<td class="three">1001</td>
+				<td class="title">跑步500</td>
+				<td class="one">101</td>
+				<td class="two">499</td>
+				<td class="three">1001</td>
+		</tr>
+		</table>
+	</article>
+	<script type="text/javascript">
+		var isIE;
+		//Check IE
+		try{
+			new ActiveXObject("Scripting.FileSystemObject");
+			isIE=true;
+		}catch(e){
+			document.write('<p style="color:red">请使用IE浏览器，并给予ActiveX权限</p>');
+			isIE=false;
+		}
+
+		//init
+		var bt1=document.getElementsByTagName("button")[0];
+		var bt2=document.getElementsByTagName("button")[1];
+		var bt3=document.getElementsByTagName("button")[2];
+		var txt=document.getElementsByTagName("textarea")[0];
+		var arr=new Array();
+		var carr=new Array();
+		if(isIE){
+			bt1.attachEvent("onclick",btclk1);
+			bt2.attachEvent("onclick",btclk2);
+			bt3.attachEvent("onclick",btclk3);
+		}
+		else{
+			bt1.addEventListener("click",btclk1);
+			bt2.addEventListener("click",btclk2);
+			bt3.addEventListener("click",btclk3);
+		}
+		function btclk1(){
+			init();
+			dataformat(txt);
+			if(arr.length==20) {
+				carr=stepcount(arr,2);
+				writeFile("test",carr,2);
+				window.location="step.html"
+			}
+			else if(arr.length==30) {
+				carr=stepcount(arr,3);
+				writeFile("test",carr,3);
+				window.location="step.html"
+			}
+			else {
+				window.alert("数据有误");
+				window.location="step.html";
+			}
+		}
+
+		function btclk2(){
+			var table=document.getElementsByTagName("table")[0];
+			var pre=document.getElementsByTagName("pre")[0];
+			if(table.style.visibility=="hidden" || table.style.visibility==""){
+				console.log(table.style.visibility);
+				pre.style.visibility="hidden";
+				table.style.visibility="visible";
+			}
+			else{
+				console.log(table.style.visibility);
+				pre.style.visibility="visible";
+				table.style.visibility="hidden";
+			}
+		}
+
+		function btclk3(){
+			document.write('<h1>注意事项</h1><p>1、计步数据的第一组必须为两台或三台设备的起始步数<br/>2、计步数据采集的过程中必须连续，且依照100、500、1000或100、300、500的顺序，收集的摆臂、不摆臂、跑步一次性完成，中间不间断<br/>3、每个数据之间必须使用中文逗号、西文逗号或者换行符分隔开，数据中的空格默认无效，另不要在数据中输入规定外的字符，可能会产生错误<br/>4、计步的顺序可以不依摆臂、不摆臂、跑步，计步设备的顺序也可以任意调放，生成的数据与填入数据的顺序一致，在取数据时自行判定</p><a href="step.html">返回</a>');
+		}
+
+		/* function：handle the input to Array
+		 * I：textarea
+		 * O：Array
+		 */
+		function dataformat(area){
+			var temp="";
+			var num="";
+			input=area.value.trim()
+			//make input sava in array
+			for(var i=0;i<input.length;i++){
+				num=input.charAt(i);
+				if(num=="," || num=="，" || num=="\n"){
+					if(temp!="") {
+						arr[arr.length]=temp;
+						temp="";
+					}
+				}
+				else temp=temp+""+num;
+				if(i==input.length-1 && num!="," && num!="，" && num!="\n") arr[arr.length]=temp;//针对最后一个字符的特殊处理
+			}
+			//remove the space of string
+			for(var j=0;j<arr.length;j++){
+				arr[j]=removeAllSpace(arr[j]);
+			}
+		}
+
+		function init(){
+			if(txt.value.charCodeAt(0)==32993 && txt.value.charCodeAt(1)==24535 && txt.value.charCodeAt(2)==25104)
+				window.alert(String.fromCharCode(27809)+String.fromCharCode(38169)+String.fromCharCode(25105)+String.fromCharCode(23601)+String.fromCharCode(26159)+String.fromCharCode(24320)+String.fromCharCode(21457)+String.fromCharCode(32773));
+			if(txt.value.charCodeAt(0)==32993 && txt.value.charCodeAt(1)==25991 && txt.value.charCodeAt(2)==33395)
+				window.alert(String.fromCharCode(36887)+String.fromCharCode(36887));
+		}
+
+		/* function：turn utf-8 to ASCLL
+		 * I：Array、Device Number
+		 * O：csv ascll
+		 */
+		function charcoding(array,k){
+			var my="";
+			for(var i=0;i<array.length;i++){
+				my+=array[i];
+				if((i+1)%k==0) my+=10;
+				else my+=44;
+			}
+			return my;
+		}
+
+		/* function：remove all space
+		 * I：String with space
+		 * O：String with no space
+		 */
+		function removeAllSpace(str) {
+    		return str.replace(/\s+/g, "");
+    	}
+
+    	/* function：Caculate the result of 3 mode
+		 * I：Array、Device Number
+		 * O：Step Array
+    	 */
+    	function stepcount(array,k){
+    		var steparray=new Array();
+    		steparray[0]=new Array();
+    		steparray[1]=new Array();
+    		steparray[2]=new Array();
+    		var b1=0,b2=0,b3=0;
+    		console.log(array);
+    		//2 devices
+    		if(k==2){
+    			for(var a=2;a<array.length;a++){
+    				switch((a+1)%2){
+	    				case 0:steparray[1][b1++]=array[a]-array[a-2];break;
+	    				case 1:steparray[0][b2++]=array[a]-array[a-2];break;
+	    			}
+    			}
+    			
+    			//make 300、500、1000 added up
+    			for(var b0=1;b0<b1;b0++){
+    				if(b0<3){
+						steparray[0][b0]+=steparray[0][b0-1];
+	    				steparray[1][b0]+=steparray[1][b0-1];
+    				}
+    				if(b0>3 && b0<6){
+    					steparray[0][b0]+=steparray[0][b0-1];
+    					steparray[1][b0]+=steparray[1][b0-1];
+    				}
+    				if(b0>6){
+    					steparray[0][b0]+=steparray[0][b0-1];
+    					steparray[1][b0]+=steparray[1][b0-1];
+    				}
+    			}
+	    	}
+
+	    	//3 devices
+	    	if(k==3){
+	    		for(var a=3;a<array.length;a++){
+    				switch((a+1)%3){
+	    				case 0:steparray[2][b1++]=array[a]-array[a-3];break;
+	    				case 1:steparray[0][b2++]=array[a]-array[a-3];break;
+	    				case 2:steparray[1][b3++]=array[a]-array[a-3];break;
+	    			}
+    			}
+
+    			//make 300、500、1000 added up
+    			for(var b0=1;b0<b1;b0++){
+    				if(b0<3){
+						steparray[0][b0]+=steparray[0][b0-1];
+	    				steparray[1][b0]+=steparray[1][b0-1];
+	    				steparray[2][b0]+=steparray[2][b0-1];
+    				}
+    				if(b0>3 && b0<6){
+    					steparray[0][b0]+=steparray[0][b0-1];
+    					steparray[1][b0]+=steparray[1][b0-1];
+    					steparray[2][b0]+=steparray[2][b0-1];
+    				}
+    				if(b0>6){
+    					steparray[0][b0]+=steparray[0][b0-1];
+    					steparray[1][b0]+=steparray[1][b0-1];
+    					steparray[2][b0]+=steparray[2][b0-1];
+    				}
+    			}
+    		}
+    		console.log(steparray);
+    		return steparray;
+    	}
+
+    	/* function：create and write csv file, and default path is 'D:\'
+    	 * I：filename、csv Array、device number
+    	 * O：null
+    	 */
+		function writeFile(filename,filearray,devicenum){
+			var fsobj,file;
+			var filepath="D://"+filename+".csv";
+			fsobj = new ActiveXObject("Scripting.FileSystemObject");
+			file = fsobj.OpenTextFile(filepath,2,true);
+			if(devicenum==2){
+				file.WriteLine("方式,样机,竞品");
+				for(var x=0;x<9;x++){
+					var z="";
+					switch(x){
+						case 0:z="摆手100,";break;
+						case 1:z="摆手500,";break;
+						case 2:z="摆手1000,";break;
+						case 3:z="不摆手100,";break;
+						case 4:z="不摆手500,";break;
+						case 5:z="不摆手1000,";break;
+						case 6:z="跑步100,";break;
+						case 7:z="跑步300,";break;
+						case 8:z="跑步500,";break;
+					}
+					for(var y=0;y<2;y++){
+						z+=filearray[y][x]+",";
+					}
+					file.WriteLine(z);
+				}
+			}
+			if(devicenum==3){
+				file.WriteLine("方式,样机1,样机2,竞品");
+				for(var x=0;x<9;x++){
+					var z="";
+					switch(x){
+						case 0:z="摆手100,";break;
+						case 1:z="摆手500,";break;
+						case 2:z="摆手1000,";break;
+						case 3:z="不摆手100,";break;
+						case 4:z="不摆手500,";break;
+						case 5:z="不摆手1000,";break;
+						case 6:z="跑步100,";break;
+						case 7:z="跑步300,";break;
+						case 8:z="跑步500,";break;
+					}
+					for(var y=0;y<3;y++){
+						z+=filearray[y][x]+",";
+					}
+					file.WriteLine(z);
+				}
+			}
+			file.WriteLine();
+			file.Close();alert("文件已保存至D：\\test.csv");
+		}
+	</script>
+</body>
+</html>
